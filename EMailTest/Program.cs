@@ -9,6 +9,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -30,28 +31,34 @@ namespace EMailTest
 
 
                 //Parse the message
-                Console.WriteLine(DateTime.Now.ToString("hh:mm:ss tt") + "Parsing the e-mail...");
+                Console.WriteLine(DateTime.Now.ToString("hh:mm:ss tt") + " Parsing the e-mail...");
                 String mailText = parseEmailMessage(message);
 
                 //Get the name of the last downloaded file
                 String lastDownload = Properties.Settings.Default["lastDownload"].ToString();
 
                 if (lastDownload.Equals(mailText)) {
-                    Console.WriteLine(DateTime.Now.ToString("hh:mm:ss tt") + "Nothing new... " + lastDownload);
+                    Console.WriteLine(DateTime.Now.ToString("hh:mm:ss tt") + " Nothing new... ");
+                    Console.WriteLine(lastDownload);
                 }
-                else {
+                else
+                {
                     //Download the file, using firfox as a helper
-                    Console.WriteLine(DateTime.Now.ToString("hh:mm:ss tt") + "Downloading file... " + mailText);
+                    Console.WriteLine(DateTime.Now.ToString("hh:mm:ss tt") + " Downloading the file... ");
+                    Console.WriteLine(mailText);
                     downloadFile(mailText);
 
+                    //Rename the downloaded file and remove "EUR" from the values
+                    Console.WriteLine(DateTime.Now.ToString("hh:mm:ss tt") + " Waiting 30 seconds...");
+                    Thread.Sleep(30000); //Wait a half-minute
+                    Console.WriteLine(DateTime.Now.ToString("hh:mm:ss tt") + " Parsing the file...");
+                    parseFile(filepath);
 
-                    //Rename the downloaded file
-                    Thread.Sleep(60000); //Wait a minute
-                    Console.WriteLine(DateTime.Now.ToString("hh:mm:ss tt") + "Renaming the file...");
-                    renameDownloadedFile(filepath);
+
+
 
                     //Kill the firefox process
-                    Console.WriteLine(DateTime.Now.ToString("hh:mm:ss tt") + "Killing the fox...");
+                    Console.WriteLine(DateTime.Now.ToString("hh:mm:ss tt") + " Killing the fox...");
                     killFirefox();
 
                     Properties.Settings.Default["lastDownload"] = mailText;
@@ -59,19 +66,26 @@ namespace EMailTest
                 }
 
                 //Sleep for 1.08 hours and "restart" the program
-                Console.WriteLine(DateTime.Now.ToString("hh:mm:ss tt") + "See you in " + (waitingTime / 1000 / 60).ToString() + " minutes...");
+                Console.WriteLine(DateTime.Now.ToString("hh:mm:ss tt") + " See you in " + (waitingTime / 1000 / 60).ToString() + " minutes...");
                 Console.WriteLine("");
                 Thread.Sleep(waitingTime);
             }
 
         }
 
-        private static void renameDownloadedFile(DirectoryInfo filepath)
+        private static void parseFile(DirectoryInfo filepath)
         {
-            var downloadedFile = filepath.GetFiles()
+            FileInfo downloadedFile = filepath.GetFiles()
                                 .OrderByDescending(f => f.LastWriteTime)
                                 .First();
-            downloadedFile.MoveTo(filepath.ToString() + "ebayOrder.csv");
+
+            String csvText = File.ReadAllText(@downloadedFile.FullName);
+            String pattern = @"\bEUR \b";
+            String replace = "";
+            String result = Regex.Replace(csvText, pattern, replace);
+            String newFilePath = filepath.ToString() + "ebayOrder.csv";
+            File.Delete(newFilePath);
+            File.WriteAllText(newFilePath, @result);
         }
 
         private static void downloadFile(string mailText)
