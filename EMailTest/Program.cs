@@ -31,22 +31,32 @@ namespace EMailTest
 
                 //Parse the message
                 Console.WriteLine("Parsing the e-mail...");
-                string mailText = parseEmailMessage(message);
+                String mailText = parseEmailMessage(message);
+
+                //Get the name of the last downloaded file
+                String lastDownload = Properties.Settings.Default["lastDownload"].ToString();
+
+                if (lastDownload.Equals(mailText)) {
+                    Console.WriteLine("Nothing new... " + lastDownload);
+                }
+                else {
+                    //Download the file, using firfox as a helper
+                    Console.WriteLine("Downloading file... " + mailText);
+                    downloadFile(mailText);
 
 
-                //Download the file, using firfox as a helper
-                Console.WriteLine("Downloading file...");
-                downloadFile(mailText);
+                    //Rename the downloaded file
+                    Thread.Sleep(60000); //Wait a minute
+                    Console.WriteLine("Renaming the file...");
+                    renameDownloadedFile(filepath);
 
+                    //Kill the firefox process
+                    Console.WriteLine("Killing the fox...");
+                    killFirefox();
 
-                //Rename the downloaded file
-                Thread.Sleep(60000); //Wait a minute
-                Console.WriteLine("Renaming the file...");
-                renameDownloadedFile(filepath);
-
-                //Kill the firefox process
-                Console.WriteLine("Killing the fox...");
-                killFirefox();
+                    Properties.Settings.Default["lastDownload"] = mailText;
+                    Properties.Settings.Default.Save();
+                }
 
                 //Sleep for 1.08 hours and "restart" the program
                 Console.WriteLine("See you in " + (waitingTime / 1000 / 60).ToString() + " minutes...");
@@ -59,8 +69,8 @@ namespace EMailTest
         private static void renameDownloadedFile(DirectoryInfo filepath)
         {
             var downloadedFile = filepath.GetFiles()
-                                                 .OrderByDescending(f => f.LastWriteTime)
-                                                 .First();
+                                .OrderByDescending(f => f.LastWriteTime)
+                                .First();
             downloadedFile.MoveTo(filepath.ToString() + "ebayOrder.csv");
         }
 
