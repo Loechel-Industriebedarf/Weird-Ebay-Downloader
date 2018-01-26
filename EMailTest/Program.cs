@@ -25,33 +25,33 @@ namespace EMailTest
             while (1 == 1)  //Endless loop
             {
                 //Connect to imap server
-                Console.WriteLine("Connecting to imap...");
+                Console.WriteLine(DateTime.Now.ToString("hh:mm:ss tt") + " Connecting to imap...");
                 MailMessage message = connectToImap(mailFolder);
 
 
                 //Parse the message
-                Console.WriteLine("Parsing the e-mail...");
+                Console.WriteLine(DateTime.Now.ToString("hh:mm:ss tt") + "Parsing the e-mail...");
                 String mailText = parseEmailMessage(message);
 
                 //Get the name of the last downloaded file
                 String lastDownload = Properties.Settings.Default["lastDownload"].ToString();
 
                 if (lastDownload.Equals(mailText)) {
-                    Console.WriteLine("Nothing new... " + lastDownload);
+                    Console.WriteLine(DateTime.Now.ToString("hh:mm:ss tt") + "Nothing new... " + lastDownload);
                 }
                 else {
                     //Download the file, using firfox as a helper
-                    Console.WriteLine("Downloading file... " + mailText);
+                    Console.WriteLine(DateTime.Now.ToString("hh:mm:ss tt") + "Downloading file... " + mailText);
                     downloadFile(mailText);
 
 
                     //Rename the downloaded file
                     Thread.Sleep(60000); //Wait a minute
-                    Console.WriteLine("Renaming the file...");
+                    Console.WriteLine(DateTime.Now.ToString("hh:mm:ss tt") + "Renaming the file...");
                     renameDownloadedFile(filepath);
 
                     //Kill the firefox process
-                    Console.WriteLine("Killing the fox...");
+                    Console.WriteLine(DateTime.Now.ToString("hh:mm:ss tt") + "Killing the fox...");
                     killFirefox();
 
                     Properties.Settings.Default["lastDownload"] = mailText;
@@ -59,7 +59,7 @@ namespace EMailTest
                 }
 
                 //Sleep for 1.08 hours and "restart" the program
-                Console.WriteLine("See you in " + (waitingTime / 1000 / 60).ToString() + " minutes...");
+                Console.WriteLine(DateTime.Now.ToString("hh:mm:ss tt") + "See you in " + (waitingTime / 1000 / 60).ToString() + " minutes...");
                 Console.WriteLine("");
                 Thread.Sleep(waitingTime);
             }
