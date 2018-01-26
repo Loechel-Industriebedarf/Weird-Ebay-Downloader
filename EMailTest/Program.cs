@@ -3,6 +3,7 @@ using Spire.Email.IMap;
 using Spire.Email.Smtp;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Net;
@@ -46,12 +47,19 @@ namespace EMailTest
                 //Cuts first char (<)
                 mailText = mailText.Substring(1, mailText.Length - 1);
 
-                using (var client = new WebClient())
-                {
-                    System.Diagnostics.Process.Start(mailText);
+                //Download the file, using firfox as a helper
+                using (var client = new WebClient()){
+                    Process.Start(mailText);
                 }
 
                 Console.WriteLine(mailText);
+                Thread.Sleep(60000); //Wait a minute
+
+                //Kill the firefox process
+                foreach (var process in Process.GetProcessesByName("firefox")) {
+                    process.Kill();
+                }
+
 
                 Thread.Sleep(3888000);  //Sleep for 1.08 hours
             }
